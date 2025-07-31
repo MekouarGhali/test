@@ -1,0 +1,2073 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion Commerciale</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .sidebar {
+            transition: all 0.3s;
+        }
+        .sidebar-collapsed {
+            width: 70px;
+        }
+        .sidebar-collapsed .sidebar-text {
+            display: none;
+        }
+        .sidebar-collapsed .logo-text {
+            display: none;
+        }
+        .sidebar-collapsed .menu-item {
+            justify-content: center;
+        }
+        .content {
+            transition: all 0.3s;
+        }
+        .content-expanded {
+            margin-left: 70px;
+        }
+        .active-menu {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .active-menu:hover {
+            background-color: #3b82f6 !important;
+        }
+        .dropdown-content {
+            display: none;
+            transition: all 0.3s;
+        }
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+        .table-container {
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+        }
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+        }
+        .animate-pulse {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <div id="sidebar" class="sidebar bg-gray-800 text-white h-full fixed shadow-lg">
+            <div class="p-4 flex items-center justify-between border-b border-gray-700">
+                <div class="flex items-center">
+                    <i class="fas fa-store text-blue-400 text-2xl"></i>
+                    <span class="logo-text ml-3 text-xl font-bold">GestionPro</span>
+                </div>
+                <button id="toggleSidebar" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            <div class="p-4 border-b border-gray-700 flex items-center">
+                <div class="relative">
+                    <img src="https://ui-avatars.com/api/?name=Admin&background=3b82f6&color=fff" alt="User" class="w-10 h-10 rounded-full">
+                    <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-gray-800"></span>
+                </div>
+                <div class="ml-3 sidebar-text">
+                    <div class="font-medium">Administrateur</div>
+                    <div class="text-xs text-gray-400">admin@gestionpro.com</div>
+                </div>
+            </div>
+            <nav class="mt-4">
+                <div>
+                    <a href="#" class="menu-item flex items-center px-4 py-3 text-gray-300 hover:bg-gray-700 active-menu" data-section="dashboard">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span class="sidebar-text ml-3">Tableau de bord</span>
+                    </a>
+                </div>
+                <div class="dropdown relative">
+                    <a href="#" class="menu-item flex items-center px-4 py-3 text-gray-300 hover:bg-gray-700" data-section="clients">
+                        <i class="fas fa-users"></i>
+                        <span class="sidebar-text ml-3">Clients</span>
+                        <span class="sidebar-text ml-auto notification-badge bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
+                    </a>
+                    <div class="dropdown-content bg-gray-900">
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800" data-subsection="client-list">Liste des clients</a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800" data-subsection="client-groups">Groupes clients</a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800" data-subsection="client-import">Import/Export</a>
+                    </div>
+                </div>
+                <div class="dropdown relative">
+                    <a href="#" class="menu-item flex items-center px-4 py-3 text-gray-300 hover:bg-gray-700" data-section="products">
+                        <i class="fas fa-boxes"></i>
+                        <span class="sidebar-text ml-3">Produits/Services</span>
+                    </a>
+                    <div class="dropdown-content bg-gray-900">
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800" data-subsection="product-list">Catalogue</a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800" data-subsection="categories">Catégories</a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800" data-subsection="inventory">Inventaire</a>
+                    </div>
+                </div>
+                <div class="dropdown relative">
+                    <a href="#" class="menu-item flex items-center px-4 py-3 text-gray-300 hover:bg-gray-700" data-section="sales">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                        <span class="sidebar-text ml-3">Ventes</span>
+                        <span class="sidebar-text ml-auto notification-badge bg-yellow-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-pulse">5</span>
+                    </a>
+                    <div class="dropdown-content bg-gray-900">
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800" data-subsection="quotes">Devis</a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800" data-subsection="orders">Commandes</a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800" data-subsection="invoices">Factures</a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800" data-subsection="deliveries">Livraisons</a>
+                    </div>
+                </div>
+                <div class="dropdown relative">
+                    <a href="#" class="menu-item flex items-center px-4 py-3 text-gray-300 hover:bg-gray-700" data-section="purchases">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="sidebar-text ml-3">Achats</span>
+                    </a>
+                    <div class="dropdown-content bg-gray-900">
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800" data-subsection="suppliers">Fournisseurs</a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800" data-subsection="purchase-orders">Commandes</a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800" data-subsection="purchase-invoices">Factures</a>
+                    </div>
+                </div>
+                <div class="dropdown relative">
+                    <a href="#" class="menu-item flex items-center px-4 py-3 text-gray-300 hover:bg-gray-700" data-section="payments">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span class="sidebar-text ml-3">Règlements</span>
+                        <span class="sidebar-text ml-auto notification-badge bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">7</span>
+                    </a>
+                    <div class="dropdown-content bg-gray-900">
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800" data-subsection="customer-payments">Clients</a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800" data-subsection="supplier-payments">Fournisseurs</a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800" data-subsection="reminders">Relances</a>
+                    </div>
+                </div>
+                <div class="dropdown relative">
+                    <a href="#" class="menu-item flex items-center px-4 py-3 text-gray-300 hover:bg-gray-700" data-section="accounting">
+                        <i class="fas fa-calculator"></i>
+                        <span class="sidebar-text ml-3">Comptabilité</span>
+                    </a>
+                    <div class="dropdown-content bg-gray-900">
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800" data-subsection="journal">Journal</a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800" data-subsection="balance">Balance</a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800" data-subsection="reports">Rapports</a>
+                    </div>
+                </div>
+                <div class="dropdown relative">
+                    <a href="#" class="menu-item flex items-center px-4 py-3 text-gray-300 hover:bg-gray-700" data-section="reports">
+                        <i class="fas fa-chart-bar"></i>
+                        <span class="sidebar-text ml-3">Statistiques</span>
+                    </a>
+                    <div class="dropdown-content bg-gray-900">
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800" data-subsection="sales-stats">Ventes</a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800" data-subsection="product-stats">Produits</a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800" data-subsection="financial-stats">Financier</a>
+                    </div>
+                </div>
+                <div class="mt-4 border-t border-gray-700 pt-2">
+                    <a href="#" class="menu-item flex items-center px-4 py-3 text-gray-300 hover:bg-gray-700" data-section="settings">
+                        <i class="fas fa-cog"></i>
+                        <span class="sidebar-text ml-3">Paramètres</span>
+                    </a>
+                </div>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div id="content" class="content flex-1 overflow-auto ml-64">
+            <!-- Top Navigation -->
+            <header class="bg-white shadow-sm">
+                <div class="px-6 py-4 flex items-center justify-between">
+                    <div class="flex items-center">
+                        <h1 id="pageTitle" class="text-xl font-semibold text-gray-800">Tableau de bord</h1>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="relative">
+                            <button class="p-2 text-gray-500 hover:text-gray-700 focus:outline-none">
+                                <i class="fas fa-bell"></i>
+                                <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+                            </button>
+                        </div>
+                        <div class="relative">
+                            <button class="p-2 text-gray-500 hover:text-gray-700 focus:outline-none">
+                                <i class="fas fa-envelope"></i>
+                                <span class="absolute top-0 right-0 w-2 h-2 bg-blue-500 rounded-full"></span>
+                            </button>
+                        </div>
+                        <div class="relative">
+                            <button id="userMenuButton" class="flex items-center space-x-2 focus:outline-none">
+                                <img src="https://ui-avatars.com/api/?name=Admin&background=3b82f6&color=fff" alt="User" class="w-8 h-8 rounded-full">
+                                <span class="hidden md:inline text-gray-700">Administrateur</span>
+                                <i class="fas fa-chevron-down text-xs text-gray-500"></i>
+                            </button>
+                            <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profil</a>
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Paramètres</a>
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 border-t border-gray-200">Déconnexion</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <main class="p-6">
+                <!-- Dashboard Section -->
+                <div id="dashboard-section" class="section-content">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500">Chiffre d'affaires</p>
+                                    <h3 class="text-2xl font-bold">24,580 €</h3>
+                                    <p class="text-green-500 text-sm mt-1"><i class="fas fa-arrow-up"></i> 12% vs mois dernier</p>
+                                </div>
+                                <div class="bg-blue-100 p-3 rounded-full">
+                                    <i class="fas fa-euro-sign text-blue-500 text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500">Factures impayées</p>
+                                    <h3 class="text-2xl font-bold">7,420 €</h3>
+                                    <p class="text-red-500 text-sm mt-1"><i class="fas fa-arrow-up"></i> 3 factures en retard</p>
+                                </div>
+                                <div class="bg-red-100 p-3 rounded-full">
+                                    <i class="fas fa-exclamation-triangle text-red-500 text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500">Nouveaux clients</p>
+                                    <h3 class="text-2xl font-bold">14</h3>
+                                    <p class="text-green-500 text-sm mt-1"><i class="fas fa-arrow-up"></i> 8% vs mois dernier</p>
+                                </div>
+                                <div class="bg-green-100 p-3 rounded-full">
+                                    <i class="fas fa-users text-green-500 text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500">Produits en alerte</p>
+                                    <h3 class="text-2xl font-bold">5</h3>
+                                    <p class="text-yellow-500 text-sm mt-1"><i class="fas fa-exclamation-circle"></i> Stock faible</p>
+                                </div>
+                                <div class="bg-yellow-100 p-3 rounded-full">
+                                    <i class="fas fa-box-open text-yellow-500 text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                        <div class="bg-white rounded-lg shadow p-6 lg:col-span-2">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-semibold">Chiffre d'affaires mensuel</h3>
+                                <select class="bg-gray-100 border border-gray-300 text-gray-700 py-1 px-3 rounded focus:outline-none">
+                                    <option>2024</option>
+                                    <option selected>2023</option>
+                                    <option>2022</option>
+                                </select>
+                            </div>
+                            <canvas id="salesChart" height="250"></canvas>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="text-lg font-semibold mb-4">Top clients</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                            <i class="fas fa-building text-blue-500 text-sm"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium">TechnoSoft</p>
+                                            <p class="text-xs text-gray-500">Entreprise</p>
+                                        </div>
+                                    </div>
+                                    <span class="font-semibold">4,850 €</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                                            <i class="fas fa-user text-green-500 text-sm"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium">Martin Dupont</p>
+                                            <p class="text-xs text-gray-500">Particulier</p>
+                                        </div>
+                                    </div>
+                                    <span class="font-semibold">3,120 €</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                            <i class="fas fa-building text-blue-500 text-sm"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium">DesignWeb</p>
+                                            <p class="text-xs text-gray-500">Entreprise</p>
+                                        </div>
+                                    </div>
+                                    <span class="font-semibold">2,750 €</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                                            <i class="fas fa-store text-purple-500 text-sm"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium">Boutique Mode</p>
+                                            <p class="text-xs text-gray-500">Commerce</p>
+                                        </div>
+                                    </div>
+                                    <span class="font-semibold">2,150 €</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                                            <i class="fas fa-user text-green-500 text-sm"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium">Sophie Lambert</p>
+                                            <p class="text-xs text-gray-500">Particulier</p>
+                                        </div>
+                                    </div>
+                                    <span class="font-semibold">1,980 €</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-semibold">Dernières factures</h3>
+                                <a href="#" class="text-blue-500 text-sm">Voir tout</a>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">N°</th>
+                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Client</th>
+                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Montant</th>
+                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        <tr>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm font-medium text-blue-500">FAC-2023-042</td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">TechnoSoft</td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">15/06/2023</td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">1,250 €</td>
+                                            <td class="px-4 py-2 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Payée</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm font-medium text-blue-500">FAC-2023-041</td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">Martin Dupont</td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">10/06/2023</td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">980 €</td>
+                                            <td class="px-4 py-2 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">En attente</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm font-medium text-blue-500">FAC-2023-040</td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">DesignWeb</td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">05/06/2023</td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">1,750 €</td>
+                                            <td class="px-4 py-2 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">En retard</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm font-medium text-blue-500">FAC-2023-039</td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">Boutique Mode</td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">01/06/2023</td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">650 €</td>
+                                            <td class="px-4 py-2 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Payée</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-semibold">Produits populaires</h3>
+                                <a href="#" class="text-blue-500 text-sm">Voir tout</a>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Produit</th>
+                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Catégorie</th>
+                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Ventes</th>
+                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Stock</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        <tr>
+                                            <td class="px-4 py-2 whitespace-nowrap">
+                                                <div class="flex items-center">
+                                                    <div class="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-md flex items-center justify-center">
+                                                        <i class="fas fa-box text-blue-500"></i>
+                                                    </div>
+                                                    <div class="ml-4">
+                                                        <div class="text-sm font-medium text-gray-900">Ordinateur Pro</div>
+                                                        <div class="text-sm text-gray-500">REF: PC-001</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">Informatique</td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">42</td>
+                                            <td class="px-4 py-2 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">En stock</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-2 whitespace-nowrap">
+                                                <div class="flex items-center">
+                                                    <div class="flex-shrink-0 h-10 w-10 bg-purple-100 rounded-md flex items-center justify-center">
+                                                        <i class="fas fa-headphones text-purple-500"></i>
+                                                    </div>
+                                                    <div class="ml-4">
+                                                        <div class="text-sm font-medium text-gray-900">Casque Audio</div>
+                                                        <div class="text-sm text-gray-500">REF: AU-015</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">Audio</td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">38</td>
+                                            <td class="px-4 py-2 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">Stock faible</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-2 whitespace-nowrap">
+                                                <div class="flex items-center">
+                                                    <div class="flex-shrink-0 h-10 w-10 bg-green-100 rounded-md flex items-center justify-center">
+                                                        <i class="fas fa-mobile-alt text-green-500"></i>
+                                                    </div>
+                                                    <div class="ml-4">
+                                                        <div class="text-sm font-medium text-gray-900">Smartphone X</div>
+                                                        <div class="text-sm text-gray-500">REF: PH-007</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">Téléphonie</td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">35</td>
+                                            <td class="px-4 py-2 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">En stock</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-2 whitespace-nowrap">
+                                                <div class="flex items-center">
+                                                    <div class="flex-shrink-0 h-10 w-10 bg-red-100 rounded-md flex items-center justify-center">
+                                                        <i class="fas fa-laptop text-red-500"></i>
+                                                    </div>
+                                                    <div class="ml-4">
+                                                        <div class="text-sm font-medium text-gray-900">PC Portable</div>
+                                                        <div class="text-sm text-gray-500">REF: LT-003</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">Informatique</td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">28</td>
+                                            <td class="px-4 py-2 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">Rupture</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Clients Section -->
+                <div id="clients-section" class="section-content hidden">
+                    <div class="bg-white rounded-lg shadow mb-6">
+                        <div class="p-4 border-b border-gray-200">
+                            <div class="flex justify-between items-center">
+                                <h2 class="text-lg font-semibold">Gestion des clients</h2>
+                                <div class="flex space-x-2">
+                                    <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md flex items-center">
+                                        <i class="fas fa-plus mr-2"></i> Nouveau client
+                                    </button>
+                                    <button class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md flex items-center">
+                                        <i class="fas fa-download mr-2"></i> Exporter
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <div class="flex justify-between items-center mb-4">
+                                <div class="relative w-64">
+                                    <input type="text" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Rechercher un client...">
+                                    <div class="absolute left-3 top-2.5 text-gray-400">
+                                        <i class="fas fa-search"></i>
+                                    </div>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <select class="bg-gray-100 border border-gray-300 text-gray-700 py-2 px-3 rounded-md focus:outline-none">
+                                        <option>Tous les types</option>
+                                        <option>Entreprise</option>
+                                        <option>Particulier</option>
+                                    </select>
+                                    <select class="bg-gray-100 border border-gray-300 text-gray-700 py-2 px-3 rounded-md focus:outline-none">
+                                        <option>Tous les groupes</option>
+                                        <option>Fidèles</option>
+                                        <option>Professionnels</option>
+                                        <option>Particuliers</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Téléphone</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Solde</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="flex items-center">
+                                                    <div class="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                                        <i class="fas fa-building text-blue-500"></i>
+                                                    </div>
+                                                    <div class="ml-4">
+                                                        <div class="text-sm font-medium text-gray-900">TechnoSoft SARL</div>
+                                                        <div class="text-sm text-gray-500">ICE: 0014789654</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Entreprise</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">06 12 34 56 78</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">contact@technosoft.com</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <span class="text-green-600">1,250 €</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <button class="text-blue-600 hover:text-blue-900 mr-3"><i class="fas fa-eye"></i></button>
+                                                <button class="text-yellow-600 hover:text-yellow-900 mr-3"><i class="fas fa-edit"></i></button>
+                                                <button class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="flex items-center">
+                                                    <div class="flex-shrink-0 h-10 w-10 bg-green-100 rounded-full flex items-center justify-center">
+                                                        <i class="fas fa-user text-green-500"></i>
+                                                    </div>
+                                                    <div class="ml-4">
+                                                        <div class="text-sm font-medium text-gray-900">Martin Dupont</div>
+                                                        <div class="text-sm text-gray-500">CIN: AB123456</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Particulier</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">06 98 76 54 32</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">m.dupont@gmail.com</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <span class="text-red-600">-980 €</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <button class="text-blue-600 hover:text-blue-900 mr-3"><i class="fas fa-eye"></i></button>
+                                                <button class="text-yellow-600 hover:text-yellow-900 mr-3"><i class="fas fa-edit"></i></button>
+                                                <button class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="flex items-center">
+                                                    <div class="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                                        <i class="fas fa-building text-blue-500"></i>
+                                                    </div>
+                                                    <div class="ml-4">
+                                                        <div class="text-sm font-medium text-gray-900">DesignWeb Agency</div>
+                                                        <div class="text-sm text-gray-500">ICE: 0036987452</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Entreprise</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">05 22 33 44 55</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">contact@designweb.ma</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <span class="text-red-600">-1,750 €</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <button class="text-blue-600 hover:text-blue-900 mr-3"><i class="fas fa-eye"></i></button>
+                                                <button class="text-yellow-600 hover:text-yellow-900 mr-3"><i class="fas fa-edit"></i></button>
+                                                <button class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="flex items-center">
+                                                    <div class="flex-shrink-0 h-10 w-10 bg-purple-100 rounded-full flex items-center justify-center">
+                                                        <i class="fas fa-store text-purple-500"></i>
+                                                    </div>
+                                                    <div class="ml-4">
+                                                        <div class="text-sm font-medium text-gray-900">Boutique Mode</div>
+                                                        <div class="text-sm text-gray-500">ICE: 0025874136</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-800">Commerce</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">05 23 45 67 89</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">info@boutiquemode.com</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <span class="text-green-600">650 €</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <button class="text-blue-600 hover:text-blue-900 mr-3"><i class="fas fa-eye"></i></button>
+                                                <button class="text-yellow-600 hover:text-yellow-900 mr-3"><i class="fas fa-edit"></i></button>
+                                                <button class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="flex items-center">
+                                                    <div class="flex-shrink-0 h-10 w-10 bg-green-100 rounded-full flex items-center justify-center">
+                                                        <i class="fas fa-user text-green-500"></i>
+                                                    </div>
+                                                    <div class="ml-4">
+                                                        <div class="text-sm font-medium text-gray-900">Sophie Lambert</div>
+                                                        <div class="text-sm text-gray-500">CIN: CD789456</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Particulier</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">06 45 78 12 34</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">s.lambert@yahoo.fr</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <span class="text-green-600">1,980 €</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <button class="text-blue-600 hover:text-blue-900 mr-3"><i class="fas fa-eye"></i></button>
+                                                <button class="text-yellow-600 hover:text-yellow-900 mr-3"><i class="fas fa-edit"></i></button>
+                                                <button class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="px-6 py-4 flex items-center justify-between border-t border-gray-200">
+                                <div class="flex-1 flex justify-between sm:hidden">
+                                    <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Précédent</a>
+                                    <a href="#" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Suivant</a>
+                                </div>
+                                <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                                    <div>
+                                        <p class="text-sm text-gray-700">
+                                            Affichage de <span class="font-medium">1</span> à <span class="font-medium">5</span> sur <span class="font-medium">24</span> clients
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                            <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                                <span class="sr-only">Précédent</span>
+                                                <i class="fas fa-chevron-left"></i>
+                                            </a>
+                                            <a href="#" aria-current="page" class="z-10 bg-blue-50 border-blue-500 text-blue-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">1</a>
+                                            <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">2</a>
+                                            <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">3</a>
+                                            <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                                <span class="sr-only">Suivant</span>
+                                                <i class="fas fa-chevron-right"></i>
+                                            </a>
+                                        </nav>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Products Section -->
+                <div id="products-section" class="section-content hidden">
+                    <div class="bg-white rounded-lg shadow mb-6">
+                        <div class="p-4 border-b border-gray-200">
+                            <div class="flex justify-between items-center">
+                                <h2 class="text-lg font-semibold">Gestion des produits et services</h2>
+                                <div class="flex space-x-2">
+                                    <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md flex items-center">
+                                        <i class="fas fa-plus mr-2"></i> Nouveau produit
+                                    </button>
+                                    <button class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md flex items-center">
+                                        <i class="fas fa-download mr-2"></i> Exporter
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <div class="flex justify-between items-center mb-4">
+                                <div class="relative w-64">
+                                    <input type="text" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Rechercher un produit...">
+                                    <div class="absolute left-3 top-2.5 text-gray-400">
+                                        <i class="fas fa-search"></i>
+                                    </div>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <select class="bg-gray-100 border border-gray-300 text-gray-700 py-2 px-3 rounded-md focus:outline-none">
+                                        <option>Toutes les catégories</option>
+                                        <option>Informatique</option>
+                                        <option>Bureautique</option>
+                                        <option>Téléphonie</option>
+                                    </select>
+                                    <select class="bg-gray-100 border border-gray-300 text-gray-700 py-2 px-3 rounded-md focus:outline-none">
+                                        <option>Tous les statuts</option>
+                                        <option>En stock</option>
+                                        <option>Stock faible</option>
+                                        <option>Rupture</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Produit</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Référence</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prix</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Catégorie</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="flex items-center">
+                                                    <div class="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-md flex items-center justify-center">
+                                                        <i class="fas fa-box text-blue-500"></i>
+                                                    </div>
+                                                    <div class="ml-4">
+                                                        <div class="text-sm font-medium text-gray-900">Ordinateur Pro</div>
+                                                        <div class="text-sm text-gray-500">PC haute performance</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">PC-001</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">1,250 €</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">15</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Informatique</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <button class="text-blue-600 hover:text-blue-900 mr-3"><i class="fas fa-eye"></i></button>
+                                                <button class="text-yellow-600 hover:text-yellow-900 mr-3"><i class="fas fa-edit"></i></button>
+                                                <button class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="flex items-center">
+                                                    <div class="flex-shrink-0 h-10 w-10 bg-purple-100 rounded-md flex items-center justify-center">
+                                                        <i class="fas fa-headphones text-purple-500"></i>
+                                                    </div>
+                                                    <div class="ml-4">
+                                                        <div class="text-sm font-medium text-gray-900">Casque Audio Pro</div>
+                                                        <div class="text-sm text-gray-500">Casque avec micro</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">AU-015</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">120 €</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">3</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Audio</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <button class="text-blue-600 hover:text-blue-900 mr-3"><i class="fas fa-eye"></i></button>
+                                                <button class="text-yellow-600 hover:text-yellow-900 mr-3"><i class="fas fa-edit"></i></button>
+                                                <button class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="flex items-center">
+                                                    <div class="flex-shrink-0 h-10 w-10 bg-green-100 rounded-md flex items-center justify-center">
+                                                        <i class="fas fa-mobile-alt text-green-500"></i>
+                                                    </div>
+                                                    <div class="ml-4">
+                                                        <div class="text-sm font-medium text-gray-900">Smartphone X</div>
+                                                        <div class="text-sm text-gray-500">Dernier modèle</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">PH-007</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">899 €</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">8</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Téléphonie</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <button class="text-blue-600 hover:text-blue-900 mr-3"><i class="fas fa-eye"></i></button>
+                                                <button class="text-yellow-600 hover:text-yellow-900 mr-3"><i class="fas fa-edit"></i></button>
+                                                <button class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="flex items-center">
+                                                    <div class="flex-shrink-0 h-10 w-10 bg-red-100 rounded-md flex items-center justify-center">
+                                                        <i class="fas fa-laptop text-red-500"></i>
+                                                    </div>
+                                                    <div class="ml-4">
+                                                        <div class="text-sm font-medium text-gray-900">PC Portable Pro</div>
+                                                        <div class="text-sm text-gray-500">15" 16GB RAM</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">LT-003</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">1,499 €</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">0</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Informatique</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <button class="text-blue-600 hover:text-blue-900 mr-3"><i class="fas fa-eye"></i></button>
+                                                <button class="text-yellow-600 hover:text-yellow-900 mr-3"><i class="fas fa-edit"></i></button>
+                                                <button class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="flex items-center">
+                                                    <div class="flex-shrink-0 h-10 w-10 bg-yellow-100 rounded-md flex items-center justify-center">
+                                                        <i class="fas fa-print text-yellow-500"></i>
+                                                    </div>
+                                                    <div class="ml-4">
+                                                        <div class="text-sm font-medium text-gray-900">Imprimante Laser</div>
+                                                        <div class="text-sm text-gray-500">Noir et blanc</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">PR-012</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">250 €</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">6</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Bureautique</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <button class="text-blue-600 hover:text-blue-900 mr-3"><i class="fas fa-eye"></i></button>
+                                                <button class="text-yellow-600 hover:text-yellow-900 mr-3"><i class="fas fa-edit"></i></button>
+                                                <button class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="px-6 py-4 flex items-center justify-between border-t border-gray-200">
+                                <div class="flex-1 flex justify-between sm:hidden">
+                                    <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Précédent</a>
+                                    <a href="#" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Suivant</a>
+                                </div>
+                                <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                                    <div>
+                                        <p class="text-sm text-gray-700">
+                                            Affichage de <span class="font-medium">1</span> à <span class="font-medium">5</span> sur <span class="font-medium">32</span> produits
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                            <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                                <span class="sr-only">Précédent</span>
+                                                <i class="fas fa-chevron-left"></i>
+                                            </a>
+                                            <a href="#" aria-current="page" class="z-10 bg-blue-50 border-blue-500 text-blue-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">1</a>
+                                            <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">2</a>
+                                            <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">3</a>
+                                            <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                                <span class="sr-only">Suivant</span>
+                                                <i class="fas fa-chevron-right"></i>
+                                            </a>
+                                        </nav>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sales Section -->
+                <div id="sales-section" class="section-content hidden">
+                    <div class="bg-white rounded-lg shadow mb-6">
+                        <div class="p-4 border-b border-gray-200">
+                            <div class="flex justify-between items-center">
+                                <h2 class="text-lg font-semibold">Gestion des ventes</h2>
+                                <div class="flex space-x-2">
+                                    <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md flex items-center">
+                                        <i class="fas fa-plus mr-2"></i> Nouveau document
+                                    </button>
+                                    <button class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md flex items-center">
+                                        <i class="fas fa-download mr-2"></i> Exporter
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <div class="flex justify-between items-center mb-4">
+                                <div class="flex space-x-2">
+                                    <button class="px-4 py-2 rounded-md bg-blue-500 text-white font-medium">Tous</button>
+                                    <button class="px-4 py-2 rounded-md bg-gray-100 text-gray-700 font-medium hover:bg-gray-200">Devis</button>
+                                    <button class="px-4 py-2 rounded-md bg-gray-100 text-gray-700 font-medium hover:bg-gray-200">Commandes</button>
+                                    <button class="px-4 py-2 rounded-md bg-gray-100 text-gray-700 font-medium hover:bg-gray-200">Factures</button>
+                                    <button class="px-4 py-2 rounded-md bg-gray-100 text-gray-700 font-medium hover:bg-gray-200">Livraisons</button>
+                                </div>
+                                <div class="relative w-64">
+                                    <input type="text" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Rechercher...">
+                                    <div class="absolute left-3 top-2.5 text-gray-400">
+                                        <i class="fas fa-search"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">N° Document</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Montant</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Facture</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-500">FAC-2023-042</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">TechnoSoft SARL</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">15/06/2023</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">1,250 €</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Payée</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <button class="text-blue-600 hover:text-blue-900 mr-3"><i class="fas fa-eye"></i></button>
+                                                <button class="text-yellow-600 hover:text-yellow-900 mr-3"><i class="fas fa-edit"></i></button>
+                                                <button class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button>
+                                                <button class="text-gray-600 hover:text-gray-900"><i class="fas fa-print"></i></button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">Devis</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-500">DEV-2023-058</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Martin Dupont</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">12/06/2023</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">980 €</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">En attente</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <button class="text-blue-600 hover:text-blue-900 mr-3"><i class="fas fa-eye"></i></button>
+                                                <button class="text-yellow-600 hover:text-yellow-900 mr-3"><i class="fas fa-edit"></i></button>
+                                                <button class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button>
+                                                <button class="text-gray-600 hover:text-gray-900"><i class="fas fa-print"></i></button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Facture</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-500">FAC-2023-041</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">DesignWeb Agency</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">05/06/2023</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">1,750 €</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">En retard</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <button class="text-blue-600 hover:text-blue-900 mr-3"><i class="fas fa-eye"></i></button>
+                                                <button class="text-yellow-600 hover:text-yellow-900 mr-3"><i class="fas fa-edit"></i></button>
+                                                <button class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button>
+                                                <button class="text-gray-600 hover:text-gray-900"><i class="fas fa-print"></i></button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-800">Livraison</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-500">BL-2023-029</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Boutique Mode</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">01/06/2023</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">650 €</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Livré</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <button class="text-blue-600 hover:text-blue-900 mr-3"><i class="fas fa-eye"></i></button>
+                                                <button class="text-yellow-600 hover:text-yellow-900 mr-3"><i class="fas fa-edit"></i></button>
+                                                <button class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button>
+                                                <button class="text-gray-600 hover:text-gray-900"><i class="fas fa-print"></i></button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Commande</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-500">CMD-2023-036</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Sophie Lambert</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">28/05/2023</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">1,980 €</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Validée</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <button class="text-blue-600 hover:text-blue-900 mr-3"><i class="fas fa-eye"></i></button>
+                                                <button class="text-yellow-600 hover:text-yellow-900 mr-3"><i class="fas fa-edit"></i></button>
+                                                <button class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button>
+                                                <button class="text-gray-600 hover:text-gray-900"><i class="fas fa-print"></i></button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="px-6 py-4 flex items-center justify-between border-t border-gray-200">
+                                <div class="flex-1 flex justify-between sm:hidden">
+                                    <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Précédent</a>
+                                    <a href="#" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Suivant</a>
+                                </div>
+                                <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                                    <div>
+                                        <p class="text-sm text-gray-700">
+                                            Affichage de <span class="font-medium">1</span> à <span class="font-medium">5</span> sur <span class="font-medium">18</span> documents
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                            <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                                <span class="sr-only">Précédent</span>
+                                                <i class="fas fa-chevron-left"></i>
+                                            </a>
+                                            <a href="#" aria-current="page" class="z-10 bg-blue-50 border-blue-500 text-blue-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">1</a>
+                                            <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">2</a>
+                                            <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">3</a>
+                                            <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                                <span class="sr-only">Suivant</span>
+                                                <i class="fas fa-chevron-right"></i>
+                                            </a>
+                                        </nav>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Purchases Section -->
+                <div id="purchases-section" class="section-content hidden">
+                    <div class="bg-white rounded-lg shadow mb-6">
+                        <div class="p-4 border-b border-gray-200">
+                            <div class="flex justify-between items-center">
+                                <h2 class="text-lg font-semibold">Gestion des achats</h2>
+                                <div class="flex space-x-2">
+                                    <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md flex items-center">
+                                        <i class="fas fa-plus mr-2"></i> Nouvel achat
+                                    </button>
+                                    <button class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md flex items-center">
+                                        <i class="fas fa-download mr-2"></i> Exporter
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <div class="flex justify-between items-center mb-4">
+                                <div class="flex space-x-2">
+                                    <button class="px-4 py-2 rounded-md bg-blue-500 text-white font-medium">Tous</button>
+                                    <button class="px-4 py-2 rounded-md bg-gray-100 text-gray-700 font-medium hover:bg-gray-200">Commandes</button>
+                                    <button class="px-4 py-2 rounded-md bg-gray-100 text-gray-700 font-medium hover:bg-gray-200">Factures</button>
+                                    <button class="px-4 py-2 rounded-md bg-gray-100 text-gray-700 font-medium hover:bg-gray-200">Réceptions</button>
+                                </div>
+                                <div class="relative w-64">
+                                    <input type="text" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Rechercher...">
+                                    <div class="absolute left-3 top-2.5 text-gray-400">
+                                        <i class="fas fa-search"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">N° Document</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fournisseur</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Montant</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Facture</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-500">FAC-F-2023-018</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Informatique Pro</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">10/06/2023</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">2,450 €</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Payée</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <button class="text-blue-600 hover:text-blue-900 mr-3"><i class="fas fa-eye"></i></button>
+                                                <button class="text-yellow-600 hover:text-yellow-900 mr-3"><i class="fas fa-edit"></i></button>
+                                                <button class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button>
+                                                <button class="text-gray-600 hover:text-gray-900"><i class="fas fa-print"></i></button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Commande</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-500">CMD-F-2023-024</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Fournitures Bureau</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">05/06/2023</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">780 €</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">En attente</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <button class="text-blue-600 hover:text-blue-900 mr-3"><i class="fas fa-eye"></i></button>
+                                                <button class="text-yellow-600 hover:text-yellow-900 mr-3"><i class="fas fa-edit"></i></button>
+                                                <button class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button>
+                                                <button class="text-gray-600 hover:text-gray-900"><i class="fas fa-print"></i></button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-800">Réception</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-500">REC-2023-015</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Electro Distribution</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">01/06/2023</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">1,250 €</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Reçu</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <button class="text-blue-600 hover:text-blue-900 mr-3"><i class="fas fa-eye"></i></button>
+                                                <button class="text-yellow-600 hover:text-yellow-900 mr-3"><i class="fas fa-edit"></i></button>
+                                                <button class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button>
+                                                <button class="text-gray-600 hover:text-gray-900"><i class="fas fa-print"></i></button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Facture</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-500">FAC-F-2023-017</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Mobilier Pro</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">28/05/2023</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">3,200 €</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">En retard</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <button class="text-blue-600 hover:text-blue-900 mr-3"><i class="fas fa-eye"></i></button>
+                                                <button class="text-yellow-600 hover:text-yellow-900 mr-3"><i class="fas fa-edit"></i></button>
+                                                <button class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button>
+                                                <button class="text-gray-600 hover:text-gray-900"><i class="fas fa-print"></i></button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="px-6 py-4 flex items-center justify-between border-t border-gray-200">
+                                <div class="flex-1 flex justify-between sm:hidden">
+                                    <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Précédent</a>
+                                    <a href="#" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Suivant</a>
+                                </div>
+                                <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                                    <div>
+                                        <p class="text-sm text-gray-700">
+                                            Affichage de <span class="font-medium">1</span> à <span class="font-medium">4</span> sur <span class="font-medium">12</span> documents
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                            <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                                <span class="sr-only">Précédent</span>
+                                                <i class="fas fa-chevron-left"></i>
+                                            </a>
+                                            <a href="#" aria-current="page" class="z-10 bg-blue-50 border-blue-500 text-blue-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">1</a>
+                                            <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">2</a>
+                                            <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">3</a>
+                                            <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                                <span class="sr-only">Suivant</span>
+                                                <i class="fas fa-chevron-right"></i>
+                                            </a>
+                                        </nav>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payments Section -->
+                <div id="payments-section" class="section-content hidden">
+                    <div class="bg-white rounded-lg shadow mb-6">
+                        <div class="p-4 border-b border-gray-200">
+                            <div class="flex justify-between items-center">
+                                <h2 class="text-lg font-semibold">Gestion des règlements</h2>
+                                <div class="flex space-x-2">
+                                    <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md flex items-center">
+                                        <i class="fas fa-plus mr-2"></i> Nouveau règlement
+                                    </button>
+                                    <button class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md flex items-center">
+                                        <i class="fas fa-download mr-2"></i> Exporter
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <div class="flex justify-between items-center mb-4">
+                                <div class="flex space-x-2">
+                                    <button class="px-4 py-2 rounded-md bg-blue-500 text-white font-medium">Tous</button>
+                                    <button class="px-4 py-2 rounded-md bg-gray-100 text-gray-700 font-medium hover:bg-gray-200">Clients</button>
+                                    <button class="px-4 py-2 rounded-md bg-gray-100 text-gray-700 font-medium hover:bg-gray-200">Fournisseurs</button>
+                                    <button class="px-4 py-2 rounded-md bg-gray-100 text-gray-700 font-medium hover:bg-gray-200">Relances</button>
+                                </div>
+                                <div class="relative w-64">
+                                    <input type="text" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Rechercher...">
+                                    <div class="absolute left-3 top-2.5 text-gray-400">
+                                        <i class="fas fa-search"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">N° Document</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tiers</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Montant</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mode</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Client</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-500">PAY-2023-042</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">TechnoSoft SARL</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">15/06/2023</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">1,250 €</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Virement</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <button class="text-blue-600 hover:text-blue-900 mr-3"><i class="fas fa-eye"></i></button>
+                                                <button class="text-yellow-600 hover:text-yellow-900 mr-3"><i class="fas fa-edit"></i></button>
+                                                <button class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button>
+                                                <button class="text-gray-600 hover:text-gray-900"><i class="fas fa-print"></i></button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-800">Fournisseur</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-500">PAY-F-2023-018</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Informatique Pro</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">10/06/2023</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">2,450 €</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">Chèque</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <button class="text-blue-600 hover:text-blue-900 mr-3"><i class="fas fa-eye"></i></button>
+                                                <button class="text-yellow-600 hover:text-yellow-900 mr-3"><i class="fas fa-edit"></i></button>
+                                                <button class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button>
+                                                <button class="text-gray-600 hover:text-gray-900"><i class="fas fa-print"></i></button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Client</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-500">PAY-2023-041</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">DesignWeb Agency</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">05/06/2023</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">1,750 €</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Espèces</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <button class="text-blue-600 hover:text-blue-900 mr-3"><i class="fas fa-eye"></i></button>
+                                                <button class="text-yellow-600 hover:text-yellow-900 mr-3"><i class="fas fa-edit"></i></button>
+                                                <button class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button>
+                                                <button class="text-gray-600 hover:text-gray-900"><i class="fas fa-print"></i></button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">Relance</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-500">REL-2023-007</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Mobilier Pro</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">28/05/2023</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">3,200 €</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">En retard</span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <button class="text-blue-600 hover:text-blue-900 mr-3"><i class="fas fa-eye"></i></button>
+                                                <button class="text-yellow-600 hover:text-yellow-900 mr-3"><i class="fas fa-edit"></i></button>
+                                                <button class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button>
+                                                <button class="text-gray-600 hover:text-gray-900"><i class="fas fa-print"></i></button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="px-6 py-4 flex items-center justify-between border-t border-gray-200">
+                                <div class="flex-1 flex justify-between sm:hidden">
+                                    <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Précédent</a>
+                                    <a href="#" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Suivant</a>
+                                </div>
+                                <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                                    <div>
+                                        <p class="text-sm text-gray-700">
+                                            Affichage de <span class="font-medium">1</span> à <span class="font-medium">4</span> sur <span class="font-medium">15</span> règlements
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                            <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                                <span class="sr-only">Précédent</span>
+                                                <i class="fas fa-chevron-left"></i>
+                                            </a>
+                                            <a href="#" aria-current="page" class="z-10 bg-blue-50 border-blue-500 text-blue-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">1</a>
+                                            <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">2</a>
+                                            <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">3</a>
+                                            <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                                <span class="sr-only">Suivant</span>
+                                                <i class="fas fa-chevron-right"></i>
+                                            </a>
+                                        </nav>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Accounting Section -->
+                <div id="accounting-section" class="section-content hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                        <div class="bg-white rounded-lg shadow p-6 lg:col-span-2">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-semibold">Journal comptable</h3>
+                                <div class="flex space-x-2">
+                                    <select class="bg-gray-100 border border-gray-300 text-gray-700 py-1 px-3 rounded focus:outline-none">
+                                        <option>Juillet 2023</option>
+                                        <option>Juin 2023</option>
+                                        <option>Mai 2023</option>
+                                    </select>
+                                    <button class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-1 rounded-md flex items-center">
+                                        <i class="fas fa-download mr-2"></i> Exporter
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">N° Pièce</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Compte</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Libellé</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Débit</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Crédit</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">15/06/2023</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-500">FAC-2023-042</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">411000</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">TechnoSoft SARL</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">1,250 €</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">15/06/2023</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-500">FAC-2023-042</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">707000</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Vente marchandises</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"></td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">1,250 €</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">10/06/2023</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-500">PAY-F-2023-018</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">401000</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Informatique Pro</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"></td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">2,450 €</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">10/06/2023</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-500">PAY-F-2023-018</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">512000</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Banque</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">2,450 €</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">05/06/2023</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-500">FAC-2023-041</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">411000</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">DesignWeb Agency</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">1,750 €</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">05/06/2023</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-500">FAC-2023-041</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">707000</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Vente marchandises</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"></td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">1,750 €</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="text-lg font-semibold mb-4">Balance comptable</h3>
+                            <div class="mb-6">
+                                <h4 class="text-md font-medium mb-2">Actif</h4>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between">
+                                        <span class="text-sm">Banque (512000)</span>
+                                        <span class="text-sm font-medium">12,450 €</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-sm">Clients (411000)</span>
+                                        <span class="text-sm font-medium">8,750 €</span>
+                                    </div>
+                                    <div class="flex justify-between border-t border-gray-200 pt-2">
+                                        <span class="text-sm font-medium">Total Actif</span>
+                                        <span class="text-sm font-medium">21,200 €</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="text-md font-medium mb-2">Passif</h4>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between">
+                                        <span class="text-sm">Capital (100000)</span>
+                                        <span class="text-sm font-medium">15,000 €</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-sm">Fournisseurs (401000)</span>
+                                        <span class="text-sm font-medium">6,200 €</span>
+                                    </div>
+                                    <div class="flex justify-between border-t border-gray-200 pt-2">
+                                        <span class="text-sm font-medium">Total Passif</span>
+                                        <span class="text-sm font-medium">21,200 €</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reports Section -->
+                <div id="reports-section" class="section-content hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-semibold">Chiffre d'affaires par client</h3>
+                                <select class="bg-gray-100 border border-gray-300 text-gray-700 py-1 px-3 rounded focus:outline-none">
+                                    <option>2024</option>
+                                    <option selected>2023</option>
+                                    <option>2022</option>
+                                </select>
+                            </div>
+                            <canvas id="clientSalesChart" height="300"></canvas>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-semibold">Top produits vendus</h3>
+                                <select class="bg-gray-100 border border-gray-300 text-gray-700 py-1 px-3 rounded focus:outline-none">
+                                    <option>2024</option>
+                                    <option selected>2023</option>
+                                    <option>2022</option>
+                                </select>
+                            </div>
+                            <canvas id="productSalesChart" height="300"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-6 mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-semibold">Évolution du chiffre d'affaires</h3>
+                            <select class="bg-gray-100 border border-gray-300 text-gray-700 py-1 px-3 rounded focus:outline-none">
+                                <option>2024</option>
+                                <option selected>2023</option>
+                                <option>2022</option>
+                            </select>
+                        </div>
+                        <canvas id="evolutionChart" height="150"></canvas>
+                    </div>
+                </div>
+
+                <!-- Settings Section -->
+                <div id="settings-section" class="section-content hidden">
+                    <div class="bg-white rounded-lg shadow mb-6">
+                        <div class="p-4 border-b border-gray-200">
+                            <h2 class="text-lg font-semibold">Paramètres de l'application</h2>
+                        </div>
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div class="md:col-span-1">
+                                    <nav class="space-y-1">
+                                        <a href="#" class="bg-blue-50 border-blue-500 text-blue-700 group flex items-center px-3 py-2 text-sm font-medium border-l-4" data-settings-tab="general">
+                                            <i class="fas fa-cog text-blue-500 mr-3"></i>
+                                            Général
+                                        </a>
+                                        <a href="#" class="border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-3 py-2 text-sm font-medium border-l-4" data-settings-tab="company">
+                                            <i class="fas fa-building text-gray-400 group-hover:text-gray-500 mr-3"></i>
+                                            Société
+                                        </a>
+                                        <a href="#" class="border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-3 py-2 text-sm font-medium border-l-4" data-settings-tab="documents">
+                                            <i class="fas fa-file-invoice text-gray-400 group-hover:text-gray-500 mr-3"></i>
+                                            Documents
+                                        </a>
+                                        <a href="#" class="border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-3 py-2 text-sm font-medium border-l-4" data-settings-tab="users">
+                                            <i class="fas fa-users text-gray-400 group-hover:text-gray-500 mr-3"></i>
+                                            Utilisateurs
+                                        </a>
+                                        <a href="#" class="border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-3 py-2 text-sm font-medium border-l-4" data-settings-tab="taxes">
+                                            <i class="fas fa-percent text-gray-400 group-hover:text-gray-500 mr-3"></i>
+                                            Taxes
+                                        </a>
+                                    </nav>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <div id="general-settings" class="settings-tab-content">
+                                        <div class="space-y-6">
+                                            <div>
+                                                <h3 class="text-lg font-medium mb-4">Paramètres généraux</h3>
+                                                <div class="grid grid-cols-1 gap-4">
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 mb-1">Devise</label>
+                                                        <select class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                                                            <option>Euro (€)</option>
+                                                            <option selected>Dirham marocain (MAD)</option>
+                                                            <option>Dollar US ($)</option>
+                                                        </select>
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 mb-1">Format de date</label>
+                                                        <select class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                                                            <option>JJ/MM/AAAA</option>
+                                                            <option selected>JJ-MM-AAAA</option>
+                                                            <option>AAAA-MM-JJ</option>
+                                                        </select>
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 mb-1">Fuseau horaire</label>
+                                                        <select class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                                                            <option selected>Casablanca (UTC+1)</option>
+                                                            <option>Paris (UTC+2)</option>
+                                                            <option>Londres (UTC+1)</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="pt-4 border-t border-gray-200">
+                                                <button type="button" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                                    Enregistrer les modifications
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="company-settings" class="settings-tab-content hidden">
+                                        <div class="space-y-6">
+                                            <div>
+                                                <h3 class="text-lg font-medium mb-4">Informations de la société</h3>
+                                                <div class="grid grid-cols-1 gap-4">
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 mb-1">Nom de la société</label>
+                                                        <input type="text" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" value="GestionPro SARL">
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 mb-1">ICE</label>
+                                                        <input type="text" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" value="001478965412345">
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
+                                                        <textarea rows="3" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">123 Avenue Mohammed V, Casablanca</textarea>
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
+                                                        <input type="text" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" value="+212 522 123 456">
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                                        <input type="email" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" value="contact@gestionpro.ma">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="pt-4 border-t border-gray-200">
+                                                <button type="button" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                                    Enregistrer les modifications
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="documents-settings" class="settings-tab-content hidden">
+                                        <div class="space-y-6">
+                                            <div>
+                                                <h3 class="text-lg font-medium mb-4">Paramètres des documents</h3>
+                                                <div class="grid grid-cols-1 gap-4">
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 mb-1">Format de numérotation des factures</label>
+                                                        <input type="text" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" value="FAC-{year}-{seq}">
+                                                        <p class="mt-1 text-sm text-gray-500">Variables disponibles: {year}, {month}, {seq}, {client}</p>
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 mb-1">Format de numérotation des devis</label>
+                                                        <input type="text" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" value="DEV-{year}-{seq}">
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 mb-1">Conditions générales</label>
+                                                        <textarea rows="4" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">Paiement à 30 jours fin de mois. Tout retard de paiement entraînera des pénalités de 10%.</textarea>
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 mb-1">Logo</label>
+                                                        <div class="mt-1 flex items-center">
+                                                            <span class="inline-block h-12 w-12 rounded-full overflow-hidden bg-gray-100">
+                                                                <i class="fas fa-store text-gray-300 text-2xl h-full w-full flex items-center justify-center"></i>
+                                                            </span>
+                                                            <button type="button" class="ml-5 bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                                                Changer
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="pt-4 border-t border-gray-200">
+                                                <button type="button" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                                    Enregistrer les modifications
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="users-settings" class="settings-tab-content hidden">
+                                        <div class="space-y-6">
+                                            <div>
+                                                <h3 class="text-lg font-medium mb-4">Gestion des utilisateurs</h3>
+                                                <div class="overflow-x-auto">
+                                                    <table class="min-w-full divide-y divide-gray-200">
+                                                        <thead class="bg-gray-50">
+                                                            <tr>
+                                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
+                                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rôle</th>
+                                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody class="bg-white divide-y divide-gray-200">
+                                                            <tr>
+                                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                                    <div class="flex items-center">
+                                                                        <div class="flex-shrink-0 h-10 w-10">
+                                                                            <img src="https://ui-avatars.com/api/?name=Admin&background=3b82f6&color=fff" alt="" class="h-10 w-10 rounded-full">
+                                                                        </div>
+                                                                        <div class="ml-4">
+                                                                            <div class="text-sm font-medium text-gray-900">Administrateur</div>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">admin@gestionpro.com</td>
+                                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                                    <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Administrateur</span>
+                                                                </td>
+                                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                                    <button class="text-yellow-600 hover:text-yellow-900 mr-3"><i class="fas fa-edit"></i></button>
+                                                                    <button class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                                    <div class="flex items-center">
+                                                                        <div class="flex-shrink-0 h-10 w-10">
+                                                                            <img src="https://ui-avatars.com/api/?name=Comptable&background=10b981&color=fff" alt="" class="h-10 w-10 rounded-full">
+                                                                        </div>
+                                                                        <div class="ml-4">
+                                                                            <div class="text-sm font-medium text-gray-900">Comptable</div>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">comptable@gestionpro.com</td>
+                                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                                    <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Comptable</span>
+                                                                </td>
+                                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                                    <button class="text-yellow-600 hover:text-yellow-900 mr-3"><i class="fas fa-edit"></i></button>
+                                                                    <button class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                                    <div class="flex items-center">
+                                                                        <div class="flex-shrink-0 h-10 w-10">
+                                                                            <img src="https://ui-avatars.com/api/?name=Vendeur&background=6366f1&color=fff" alt="" class="h-10 w-10 rounded-full">
+                                                                        </div>
+                                                                        <div class="ml-4">
+                                                                            <div class="text-sm font-medium text-gray-900">Vendeur</div>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">vendeur@gestionpro.com</td>
+                                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                                    <span class="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-800">Vendeur</span>
+                                                                </td>
+                                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                                    <button class="text-yellow-600 hover:text-yellow-900 mr-3"><i class="fas fa-edit"></i></button>
+                                                                    <button class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                            <div class="pt-4 border-t border-gray-200">
+                                                <button type="button" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                                    <i class="fas fa-plus mr-2"></i> Ajouter un utilisateur
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="taxes-settings" class="settings-tab-content hidden">
+                                        <div class="space-y-6">
+                                            <div>
+                                                <h3 class="text-lg font-medium mb-4">Gestion des taxes</h3>
+                                                <div class="overflow-x-auto">
+                                                    <table class="min-w-full divide-y divide-gray-200">
+                                                        <thead class="bg-gray-50">
+                                                            <tr>
+                                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
+                                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Taux</th>
+                                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Par défaut</th>
+                                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody class="bg-white divide-y divide-gray-200">
+                                                            <tr>
+                                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">TVA 20%</td>
+                                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">20%</td>
+                                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                                    <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Oui</span>
+                                                                </td>
+                                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                                    <button class="text-yellow-600 hover:text-yellow-900 mr-3"><i class="fas fa-edit"></i></button>
+                                                                    <button class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">TVA 10%</td>
+                                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">10%</td>
+                                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                                    <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">Non</span>
+                                                                </td>
+                                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                                    <button class="text-yellow-600 hover:text-yellow-900 mr-3"><i class="fas fa-edit"></i></button>
+                                                                    <button class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">TVA 14%</td>
+                                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">14%</td>
+                                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                                    <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">Non</span>
+                                                                </td>
+                                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                                    <button class="text-yellow-600 hover:text-yellow-900 mr-3"><i class="fas fa-edit"></i></button>
+                                                                    <button class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                            <div class="pt-4 border-t border-gray-200">
+                                                <button type="button" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                                    <i class="fas fa-plus mr-2"></i> Ajouter une taxe
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Toggle sidebar
+        document.getElementById('toggleSidebar').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('sidebar-collapsed');
+            document.getElementById('content').classList.toggle('content-expanded');
+        });
+
+        // User menu dropdown
+        document.getElementById('userMenuButton').addEventListener('click', function() {
+            document.getElementById('userMenu').classList.toggle('hidden');
+        });
+
+        // Close user menu when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('#userMenuButton') && !event.target.closest('#userMenu')) {
+                document.getElementById('userMenu').classList.add('hidden');
+            }
+        });
+
+        // Navigation between sections
+        document.querySelectorAll('[data-section]').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Remove active class from all menu items
+                document.querySelectorAll('.menu-item').forEach(menuItem => {
+                    menuItem.classList.remove('active-menu');
+                });
+                
+                // Add active class to clicked menu item
+                this.classList.add('active-menu');
+                
+                // Hide all sections
+                document.querySelectorAll('.section-content').forEach(section => {
+                    section.classList.add('hidden');
+                });
+                
+                // Show selected section
+                const sectionId = this.getAttribute('data-section') + '-section';
+                document.getElementById(sectionId).classList.remove('hidden');
+                
+                // Update page title
+                const pageTitle = this.querySelector('.sidebar-text') ? this.querySelector('.sidebar-text').textContent : this.textContent;
+                document.getElementById('pageTitle').textContent = pageTitle;
+            });
+        });
+
+        // Settings tabs
+        document.querySelectorAll('[data-settings-tab]').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Remove active class from all tabs
+                document.querySelectorAll('[data-settings-tab]').forEach(tab => {
+                    tab.classList.remove('bg-blue-50', 'border-blue-500', 'text-blue-700');
+                    tab.classList.add('border-transparent', 'text-gray-600', 'hover:bg-gray-50', 'hover:text-gray-900');
+                });
+                
+                // Add active class to clicked tab
+                this.classList.remove('border-transparent', 'text-gray-600', 'hover:bg-gray-50', 'hover:text-gray-900');
+                this.classList.add('bg-blue-50', 'border-blue-500', 'text-blue-700');
+                
+                // Hide all tab contents
+                document.querySelectorAll('.settings-tab-content').forEach(content => {
+                    content.classList.add('hidden');
+                });
+                
+                // Show selected tab content
+                const tabId = this.getAttribute('data-settings-tab') + '-settings';
+                document.getElementById(tabId).classList.remove('hidden');
+            });
+        });
+
+        // Charts
+        document.addEventListener('DOMContentLoaded', function() {
+            // Sales Chart
+            const salesCtx = document.getElementById('salesChart').getContext('2d');
+            const salesChart = new Chart(salesCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'],
+                    datasets: [{
+                        label: 'Chiffre d\'affaires',
+                        data: [12000, 15000, 18000, 14000, 16000, 19000, 22000, 20000, 23000, 21000, 24000, 28000],
+                        backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + ' €';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.parsed.y + ' €';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Client Sales Chart
+            const clientSalesCtx = document.getElementById('clientSalesChart').getContext('2d');
+            const clientSalesChart = new Chart(clientSalesCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['TechnoSoft', 'Martin Dupont', 'DesignWeb', 'Boutique Mode', 'Sophie Lambert', 'Autres'],
+                    datasets: [{
+                        data: [4850, 3120, 2750, 2150, 1980, 5730],
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.7)',
+                            'rgba(16, 185, 129, 0.7)',
+                            'rgba(99, 102, 241, 0.7)',
+                            'rgba(245, 158, 11, 0.7)',
+                            'rgba(244, 63, 94, 0.7)',
+                            'rgba(156, 163, 175, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(99, 102, 241, 1)',
+                            'rgba(245, 158, 11, 1)',
+                            'rgba(244, 63, 94, 1)',
+                            'rgba(156, 163, 175, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + context.raw + ' €';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Product Sales Chart
+            const productSalesCtx = document.getElementById('productSalesChart').getContext('2d');
+            const productSalesChart = new Chart(productSalesCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Ordinateur Pro', 'Casque Audio', 'Smartphone X', 'PC Portable', 'Imprimante'],
+                    datasets: [{
+                        label: 'Quantité vendue',
+                        data: [42, 38, 35, 28, 25],
+                        backgroundColor: 'rgba(99, 102, 241, 0.7)',
+                        borderColor: 'rgba(99, 102, 241, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Evolution Chart
+            const evolutionCtx = document.getElementById('evolutionChart').getContext('2d');
+            const evolutionChart = new Chart(evolutionCtx, {
+                type: 'line',
+                data: {
+                    labels: ['2018', '2019', '2020', '2021', '2022', '2023'],
+                    datasets: [{
+                        label: 'Chiffre d\'affaires (en k€)',
+                        data: [120, 150, 135, 180, 210, 240],
+                        fill: false,
+                        backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
